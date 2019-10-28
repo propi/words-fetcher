@@ -1,7 +1,5 @@
 package com.github.propi.wordsfetcher
 
-import java.util.concurrent.atomic.AtomicBoolean
-
 import akka.actor.ActorSystem
 import akka.http.scaladsl.marshallers.sprayjson.SprayJsonSupport._
 import akka.http.scaladsl.server.Directives._
@@ -9,8 +7,8 @@ import akka.http.scaladsl.server.Route
 import akka.stream.{ActorMaterializer, Materializer}
 import com.github.propi.wordsfetcher.JsonFormats._
 import com.github.propi.wordsfetcher.PatternMatcher.IMapper
+import com.github.propi.wordsfetcher.PatternMatcher.PatternMatcherBuilder._
 import com.github.propi.wordsfetcher.util.{DefaultServer, DefaultServerConf}
-import PatternMatcher.PatternMatcherBuilder._
 
 import scala.concurrent.Await
 import scala.concurrent.duration._

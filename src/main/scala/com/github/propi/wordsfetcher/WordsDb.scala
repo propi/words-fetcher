@@ -2,12 +2,12 @@ package com.github.propi.wordsfetcher
 
 import java.io.{File, PrintWriter}
 
+import com.github.propi.wordsfetcher.LazyMap._
+import com.github.propi.wordsfetcher.PatternMatcher.PatternMatcherBuilder._
 import com.github.propi.wordsfetcher.PatternMatcher.{IMapper, MMapper, PatternMatcherBuilder}
 
 import scala.io.Source
 import scala.util.Try
-import LazyMap._
-import PatternMatcherBuilder._
 
 /**
   * Created by propan on 21. 4. 2017.
@@ -113,9 +113,11 @@ object WordsDb {
 
     class InMemory(cache: collection.Map[Char, collection.Map[Int, IndexedSeq[Word]]]) extends DbMode {
       def wordsDb(patternMatcher: PatternMatcher[_]): TraversableOnce[Word] = patternMatcher.pattern match {
-        case x: Pattern.HasFirstLetter with Pattern.HasLength => cache.get(x.firstLetter).flatMap(_.get(x.length)).getOrElse(Iterator.empty)
-        case x: Pattern.HasFirstLetter => cache.get(x.firstLetter).map(_.valuesIterator.flatten).getOrElse(Iterator.empty)
-        case x: Pattern.HasLength => cache.valuesIterator.flatMap(_.get(x.length).map(_.iterator).getOrElse(Iterator.empty))
+        case Pattern(Some(firstLetter), Some(length), false) => cache.get(firstLetter).flatMap(_.get(length)).getOrElse(Iterator.empty)
+        case Pattern(Some(firstLetter), Some(length), true) => cache.get(firstLetter).iterator.flatMap(x => x.keysIterator.filter(_ >= length).flatMap(x.apply))
+        case Pattern(Some(firstLetter), _, _) => cache.get(firstLetter).map(_.valuesIterator.flatten).getOrElse(Iterator.empty)
+        case Pattern(None, Some(length), true) => cache.valuesIterator.flatMap(x => x.keysIterator.filter(_ >= length).flatMap(x.apply))
+        case Pattern(None, Some(length), false) => cache.valuesIterator.flatMap(_.get(length).map(_.iterator).getOrElse(Iterator.empty))
         case _ => cache.valuesIterator.flatMap(_.valuesIterator.flatten)
       }
     }

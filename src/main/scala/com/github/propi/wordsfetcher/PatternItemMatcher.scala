@@ -17,7 +17,7 @@ trait PatternItemMatcher[T <: Pattern.PatternItem] {
 object PatternItemMatcher {
 
   implicit def apply(patternItem: PatternItem)(implicit mapper: IMapper): PatternItemMatcher[_] = mapper.getOrElse(patternItem, patternItem) match {
-    case PatternItem.AnyVariable => new AlwaysTruePatternItemMatcher(patternItem)
+    case PatternItem.AnyVariable | PatternItem.AnyWildcard => new AlwaysTruePatternItemMatcher(patternItem)
     case x: PatternItem.Variable =>
       val oneOf = x.oneOf.map(new OneOfPatternItemMatcher(_)).getOrElse(new AlwaysTruePatternItemMatcher(patternItem))
       val noneOf = x.noneOf.map(new NoneOfPatternItemMatcher(_)).getOrElse(new AlwaysTruePatternItemMatcher(patternItem))

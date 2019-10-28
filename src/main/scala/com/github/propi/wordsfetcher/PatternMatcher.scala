@@ -44,8 +44,19 @@ object PatternMatcher {
   }
 
   class ExactPatternMatcher(val pattern: Pattern.ExactPattern) extends VariableMapper[Pattern.ExactPattern] {
-    def matchWordWithMapper(word: Word)(implicit mapper: MMapper): Boolean = word.word.length == pattern.letters.size &&
-      word.word.toIterator.zip(pattern.letters.iterator).forall(compareCharWithPatternItem.tupled)
+    def matchWordWithMapper(word: Word)(implicit mapper: MMapper): Boolean = {
+      pattern.norm(word.word.length).exists { pattern =>
+        val pmapper = mapper.clone()
+        val result = word.word.length == pattern.letters.size &&
+          word.word.toIterator.zip(pattern.letters.iterator).forall(compareCharWithPatternItem(pmapper).tupled)
+        if (result) {
+          mapper ++= pmapper
+          result
+        } else {
+          result
+        }
+      }
+    }
 
     def filterFile(length: Int, firstChar: Char): Boolean = {
       implicit val mapper: MMapper = collection.mutable.HashMap.empty
